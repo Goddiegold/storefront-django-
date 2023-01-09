@@ -4,6 +4,8 @@ from django.db.models.aggregates import Count
 from django.utils.html import format_html, urlencode
 from django.urls import reverse
 from . import models
+import tags
+from django.contrib.contenttypes.admin import GenericTabularInline
 
 less_than_ten = '<10'
 class InventoryFilter(admin.SimpleListFilter):
@@ -22,12 +24,15 @@ class InventoryFilter(admin.SimpleListFilter):
             return queryset.filter(inventory__lt=10)
 
 
+
+
 # Register your models here.
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
     autocomplete_fields=['collection']
-    search_fields=['product']
+    search_fields=['title']
     actions = ['clear_inventory']
+    # inlines=[TagInline]
     prepopulated_fields = {
         'slug':['title']
     }
