@@ -9,7 +9,7 @@ from .serialize import ProductSerializers, CollectionSerializers
 
 # Create your views here.
 
-
+## route to get all products and a new product##
 @api_view(['GET', 'POST'])
 def product_list(request):
     if request.method == 'GET':
@@ -30,6 +30,7 @@ def product_list(request):
     # return Response(serializer.data)
 
 
+##route to get a particular product and perform operations like get/put/delete##
 @api_view(['GET', 'PUT', 'DELETE'])
 def product_detail(request, id):
     # try:
@@ -56,6 +57,7 @@ def product_detail(request, id):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+###route to get all collection and add a new collection ###
 @api_view(['GET', 'POST'])
 def collection_list(request):
     if request.method == 'GET':
@@ -70,6 +72,7 @@ def collection_list(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+##route to get a particular collection and perform operations like get/put/delete##
 @api_view(['GET', 'PUT', 'DELETE'])
 def collection_detail(request, pk):
     collection = get_object_or_404(Collection.objects.annotate(
