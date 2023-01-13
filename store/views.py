@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.mixins import ListModelMixin, CreateModelMixin
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.generics import ListCreateAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from .models import Product, Collection
 from .serialize import ProductSerializers, CollectionSerializers
 
@@ -45,21 +45,24 @@ class ProductList(ListCreateAPIView):
 
 
 ##route to get a particular product and perform operations like get/put/delete##
-class ProductDetail(APIView):
-    def get(self,request, id):
-        product = get_object_or_404(Product, pk=id)
-        serializer = ProductSerializers(product)
-        return Response(serializer.data)
+class ProductDetail(RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializers
 
-    def put(self,request, id):
-        product = get_object_or_404(Product, pk=id)
-        serializer = ProductSerializers(product, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+    # def get(self,request, id):
+    #     product = get_object_or_404(Product, pk=id)
+    #     serializer = ProductSerializers(product)
+    #     return Response(serializer.data)
 
-    def delete(self,request, id):
-        product = get_object_or_404(Product, pk=id)
+    # def put(self,request, id):
+    #     product = get_object_or_404(Product, pk=id)
+    #     serializer = ProductSerializers(product, data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data)
+
+    def delete(self,request, pk):
+        product = get_object_or_404(Product, pk=pk)
         if product.orderitems.count() > 0:
             return Response({'error': 'Not allowed!'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         product.delete()
@@ -86,19 +89,23 @@ class CollectionList(ListCreateAPIView):
 
 
 ##route to get a particular collection and perform operations like get/put/delete##
-class CollectionDetail(APIView):
-    def get(self,request,pk):
-        collection = get_object_or_404(Collection.objects.annotate(
-        products_count=Count('products')), pk=pk)
-        serializer = CollectionSerializers(collection)
-        return Response(serializer.data)
+class CollectionDetail(RetrieveUpdateDestroyAPIView):
+    queryset = Collection.objects.annotate(
+        products_count=Count('products'))
+    serializer_class = CollectionSerializers
 
-    def put(self,request,pk):
-        collection = get_object_or_404(Collection.objects.annotate(
-        products_count=Count('products')), pk=pk)
-        serializer = CollectionSerializers(collection, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+    # def get(self,request,pk):
+    #     collection = get_object_or_404(Collection.objects.annotate(
+    #     products_count=Count('products')), pk=pk)
+    #     serializer = CollectionSerializers(collection)
+    #     return Response(serializer.data)
+
+    # def put(self,request,pk):
+    #     collection = get_object_or_404(Collection.objects.annotate(
+    #     products_count=Count('products')), pk=pk)
+    #     serializer = CollectionSerializers(collection, data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
 
     def delete(self,request,pk):
         collection = get_object_or_404(Collection.objects.annotate(
