@@ -8,15 +8,45 @@ from rest_framework.mixins import ListModelMixin, CreateModelMixin
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.viewsets import ModelViewSet
 from .models import Product, Collection
 from .serialize import ProductSerializers, CollectionSerializers
 
 # Create your views here.
 
-## route to get all products and a new product##
-class ProductList(ListCreateAPIView):
-    queryset = Product.objects.select_related('collection').all()
+
+##Product viewsets##
+class ProductViewSet(ModelViewSet):
+    queryset = Product.objects.all()
     serializer_class = ProductSerializers
+
+    def get_serializer_context(self):
+        return {'request':self.request}
+
+    def delete(self,request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        if product.orderitems.count() > 0:
+            return Response({'error': 'Not allowed!'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        product.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CollectionViewSet(ModelViewSet):
+    queryset = Collection.objects.annotate(products_count=Count('products')).all()
+    serializer_class = CollectionSerializers
+
+    def delete(self,request,pk):
+        collection = get_object_or_404(Collection, pk=pk)
+        if collection.products.count() > 0:
+            return Response({'error':'Something went wrong!'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        collection.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+## route to get all products and a new product##
+# class ProductList(ListCreateAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializers
 
 
     # def get_queryset(self):
@@ -25,8 +55,8 @@ class ProductList(ListCreateAPIView):
     # def get_serializer_class(self):
     #     return ProductSerializers
 
-    def get_serializer_context(self):
-        return {'request':self.request}
+    # def get_serializer_context(self):
+    #     return {'request':self.request}
 
     # def get(self,request):
     #     queryset = Product.objects.select_related('collection').all()
@@ -45,9 +75,9 @@ class ProductList(ListCreateAPIView):
 
 
 ##route to get a particular product and perform operations like get/put/delete##
-class ProductDetail(RetrieveUpdateDestroyAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializers
+# class ProductDetail(RetrieveUpdateDestroyAPIView):
+    # queryset = Product.objects.all()
+    # serializer_class = ProductSerializers
 
     # def get(self,request, id):
     #     product = get_object_or_404(Product, pk=id)
@@ -61,19 +91,19 @@ class ProductDetail(RetrieveUpdateDestroyAPIView):
     #     serializer.save()
     #     return Response(serializer.data)
 
-    def delete(self,request, pk):
-        product = get_object_or_404(Product, pk=pk)
-        if product.orderitems.count() > 0:
-            return Response({'error': 'Not allowed!'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        product.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        # def delete(self,request, pk):
+        #     product = get_object_or_404(Product, pk=pk)
+        #     if product.orderitems.count() > 0:
+        #         return Response({'error': 'Not allowed!'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        #     product.delete()
+        #     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 
 ###route to get all collection and add a new collection ###
-class CollectionList(ListCreateAPIView):
-    queryset = Collection.objects.annotate(products_count=Count('products')).all()
-    serializer_class = CollectionSerializers
+# class CollectionList(ListCreateAPIView):
+#     queryset = Collection.objects.annotate(products_count=Count('products')).all()
+#     serializer_class = CollectionSerializers
     # def get(self,request):
     #     queryset = Collection.objects.annotate(
     #         products_count=Count('products')).all()
@@ -89,10 +119,10 @@ class CollectionList(ListCreateAPIView):
 
 
 ##route to get a particular collection and perform operations like get/put/delete##
-class CollectionDetail(RetrieveUpdateDestroyAPIView):
-    queryset = Collection.objects.annotate(
-        products_count=Count('products'))
-    serializer_class = CollectionSerializers
+# class CollectionDetail(RetrieveUpdateDestroyAPIView):
+    # queryset = Collection.objects.annotate(
+    #     products_count=Count('products'))
+    # serializer_class = CollectionSerializers
 
     # def get(self,request,pk):
     #     collection = get_object_or_404(Collection.objects.annotate(
@@ -107,12 +137,12 @@ class CollectionDetail(RetrieveUpdateDestroyAPIView):
     #     serializer.is_valid(raise_exception=True)
     #     serializer.save()
 
-    def delete(self,request,pk):
-        collection = get_object_or_404(Collection.objects.annotate(
-        products_count=Count('products')), pk=pk)
-        if collection.products.count() > 0:
-            return Response({'error':'Something went wrong!'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        collection.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    # def delete(self,request,pk):
+    #     collection = get_object_or_404(Collection.objects.annotate(
+    #     products_count=Count('products')), pk=pk)
+    #     if collection.products.count() > 0:
+    #         return Response({'error':'Something went wrong!'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    #     collection.delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
         
        
