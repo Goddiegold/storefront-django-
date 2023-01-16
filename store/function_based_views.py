@@ -5,20 +5,22 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Product, Collection
-from .serialize import ProductSerializers, CollectionSerializers
+from .serialize import ProductSerializer, CollectionSerializer
 
 # Create your views here.
 
 ## route to get all products and a new product##
+
+
 @api_view(['GET', 'POST'])
 def product_list(request):
     if request.method == 'GET':
         queryset = Product.objects.select_related('collection').all()
-        serializer = ProductSerializers(
+        serializer = ProductSerializer(
             queryset, many=True, context={'request': request})
         return Response(serializer.data)
     elif request.method == 'POST':
-        serializer = ProductSerializers(data=request.data)
+        serializer = ProductSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         print(serializer.validated_data)
@@ -30,7 +32,7 @@ def product_list(request):
     # return Response(serializer.data)
 
 
-##route to get a particular product and perform operations like get/put/delete##
+## route to get a particular product and perform operations like get/put/delete##
 @api_view(['GET', 'PUT', 'DELETE'])
 def product_detail(request, id):
     # try:
@@ -43,10 +45,10 @@ def product_detail(request, id):
     # instead of the above
     product = get_object_or_404(Product, pk=id)
     if request.method == 'GET':
-        serializer = ProductSerializers(product)
+        serializer = ProductSerializer(product)
         return Response(serializer.data)
     elif request.method == 'PUT':
-        serializer = ProductSerializers(product, data=request.data)
+        serializer = ProductSerializer(product, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
@@ -57,36 +59,36 @@ def product_detail(request, id):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-###route to get all collection and add a new collection ###
+### route to get all collection and add a new collection ###
 @api_view(['GET', 'POST'])
 def collection_list(request):
     if request.method == 'GET':
         queryset = Collection.objects.annotate(
             products_count=Count('products')).all()
-        serializer = CollectionSerializers(queryset, many=True)
+        serializer = CollectionSerializer(queryset, many=True)
         return Response(serializer.data)
     elif request.method == 'POST':
-        serializer = CollectionSerializers(data=request.data)
+        serializer = CollectionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-##route to get a particular collection and perform operations like get/put/delete##
+## route to get a particular collection and perform operations like get/put/delete##
 @api_view(['GET', 'PUT', 'DELETE'])
 def collection_detail(request, pk):
     collection = get_object_or_404(Collection.objects.annotate(
         products_count=Count('products')), pk=pk)
 
     if request.method == 'GET':
-        serializer = CollectionSerializers(collection)
+        serializer = CollectionSerializer(collection)
         return Response(serializer.data)
     elif request.method == 'PUT':
-        serializer = CollectionSerializers(collection, data=request.data)
+        serializer = CollectionSerializer(collection, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
     elif request.method == 'DELETE':
         if collection.products.count() > 0:
-            return Response({'error':'Something went wrong!'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+            return Response({'error': 'Something went wrong!'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         collection.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
