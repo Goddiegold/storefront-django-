@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 from rest_framework.pagination import PageNumberPagination
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sessions',
     'rest_framework',
+     'djoser',
     'django_filters', 
     'playground',
     'debug_toolbar',
@@ -63,7 +65,7 @@ INTERNAL_IPS = [
     # ...
     '127.0.0.1',
     # ...
-]
+] 
 
 ROOT_URLCONF = 'storefront.urls'
 
@@ -146,7 +148,24 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'COERCE_DECIMAL_TO_STRING':False,
 #    'DEFAULT_PAGINATION_CLASS':  'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE':10,
+    # 'PAGE_SIZE':10,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication', 
+    ),
+    # 'DEFAULT_PERMISSION_CLASSES':['rest_framework.permissions.isAuthenticated']
+}
+
+SIMPLE_JWT = {
+   'AUTH_HEADER_TYPES': ('JWT',),
+   'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
 }
 
 AUTH_USER_MODEL = 'core.User'
+
+
+DJOSER = {
+    'SERIALIZERS': {
+        'user_create':'core.serializers.AppUserCreateSerializer',
+        'current_user':'core.serializers.UserSerializer',
+    }
+}
