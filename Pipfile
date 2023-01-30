@@ -19,6 +19,7 @@ redis = "*"
 celery = "*"
 flower = "*"
 django-silk = "*"
+django-redis = "*"
 
 [dev-packages]
 autopep8 = "*"
