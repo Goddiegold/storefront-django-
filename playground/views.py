@@ -5,10 +5,15 @@ from django.shortcuts import render
 from django.core.cache import cache
 from django.views.decorators.cache import cache_page
 import requests
+import logging
 
 
-@cache_page(5 * 60)
+logger = logging.getLogger(__name__)
+
+
+# @cache_page(5 * 60)
 def say_hello(request):
+
    #  notify_customers.delay()
     # try:
        # send_mail('subject', 'message', recipient_list=['gehikhamhen247@gmail.com'], from_email='info@nicerthings.com.ng')
@@ -26,6 +31,12 @@ def say_hello(request):
     # except BadHeaderError:
     #     pass
 
-    response = requests.get('https://httpbin.org/delay/2')
-    print(response.json())
-    return render(request, 'hello.html', {'name': 'Mosh'})
+   try:
+      logger.info('Calling http_bin')
+      response = requests.get('https://httpbin.org/delay/2')
+      logger.info('Received the reponse')
+      print(response.json())
+   except requests.ConnectionError:
+      logger.critical('httpbin is offline')
+    
+   return render(request, 'hello.html', {'name': 'Mosh'})
