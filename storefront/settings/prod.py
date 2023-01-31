@@ -6,4 +6,4 @@ DEBUG = False
 
 SECRET_KEY = os.environ['SECRET_KEY']
 
-ALLOWED_HOSTS = ["https://storefront-django.onrender.com"]
+ALLOWED_HOSTS = ["storefront-django.onrender.com"]
