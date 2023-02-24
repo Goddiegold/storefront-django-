@@ -1,5 +1,5 @@
 *.pyc
+*.lock
 /static/
+/.vscode/
 general.log
-
-Pipfile.lock
